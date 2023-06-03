@@ -27,6 +27,16 @@ import urllib.error
 import requests
 from bs4 import BeautifulSoup
 
+#import ML models
+
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.linear_model import SGDClassifier
 
 class NewsAnalyzer:
     """
@@ -39,20 +49,47 @@ class NewsAnalyzer:
     __nlp = spacy.load("es_core_news_lg")
 
     def ner_from_str(self):
+        """
+        """
 
         pass
 
     def ner_from_file(self):
+        """
+        """
 
         pass
 
     def ner_from_url(self):
+        """
+        """
 
         pass
 
-    def ner_from_dataset(self):
+    def ner_from_dataset(self,df:pd.DataFrame, output_path:str)->None:
+        """Return a dataframe with a cleaned tags and cleaned text.
+        """
 
-        pass
+        datos_preprocess:pd.DataFrame = self.__main_preprocess(df, self.__impact_tags)
+        datos_new_columns:pd.DataFrame = self.__main_ner(datos_preprocess)
+        print(datos_preprocess.head())
+
+
+    __default_path = "https://www.wwf.org.co/_donde_trabajamos_/amazonas/las_seis_grandes_amenazas_de_la_amazonia/#:~:text=Desde%20el%20a%C3%B1o%202000%20hasta,la%20deforestaci%C3%B3n%20en%20la%20regi%C3%B3n"
+
+
+    def web_scrapping(self, url:string = __default_path)->BeautifulSoup:
+        """
+        """
+        # URL
+        r = requests.get(url)
+        data = r.text
+        soup = BeautifulSoup(data, "html.parser")
+        #Extract content
+        for s in soup.select('style'):
+            s.extract()
+
+        return soup
 
     # NLP
     def __find_organizations(self, text, nlp) -> list:
@@ -276,3 +313,83 @@ class NewsAnalyzer:
         df["DATES"] = dates_list
         return df
 
+
+    # Impact tag ML model methods
+
+    # datos_new_columns
+    X = data_new2.text_preprocess
+    y = data_new2.etiqueta_preprocess
+
+    __X_train, __X_test, __y_train, __y_test = train_test_split(X, y, test_size=0.3, random_state = 42)
+
+    def __multinomial_NB(self):
+        nb = Pipeline([('vect', CountVectorizer()),
+               ('tfidf', TfidfTransformer()),
+               ('clf', MultinomialNB()),
+              ])
+        nb.fit(self.X_train, self.y_train)
+        my_tags = ["mineria", "contaminacion", "deforestacion", "narcotrafico", "infraestructura"]
+
+        y_pred = nb.predict(self.X_test)
+
+        print('accuracy %s' % accuracy_score(y_pred, self.y_test))
+        print(classification_report(self.y_test, y_pred,target_names=my_tags))
+
+    def __SGD_Classifier(self):
+        sgd = Pipeline([('vect', CountVectorizer()),
+                        ('tfidf', TfidfTransformer()),
+                        ('clf', SGDClassifier(loss='hinge', penalty='l2',alpha=1e-3, random_state=42, max_iter=5, tol=None)),
+                    ])
+        sgd.fit(self.X_train, self.y_train)
+        y_pred = sgd.predict(self.X_test)
+
+        print('accuracy %s' % accuracy_score(y_pred, self.y_test))
+        print(classification_report(self.y_test, y_pred,target_names=self.__impact_tags))       
+
+    def __log_reg(self):
+        logreg = Pipeline([('vect', CountVectorizer()),
+                ('tfidf', TfidfTransformer()),
+                ('clf', LogisticRegression(n_jobs=1, C=1e5)),
+               ])
+        logreg.fit(self.X_train, self.y_train)
+        y_pred = logreg.predict(self.X_test)
+
+        print('accuracy %s' % accuracy_score(y_pred, self.y_test))
+        print(classification_report(self.y_test, y_pred,target_names=self.__impact_tags))
+
+    def __lineal_SVC(self):
+        svc = Pipeline([('vect', CountVectorizer()),
+                ('tfidf', TfidfTransformer()),
+                ('clf', LinearSVC()),
+               ])
+        svc.fit(self.X_train, self.y_train)
+
+        y_pred = svc.predict(self.X_test)
+
+        print('accuracy %s' % accuracy_score(y_pred, self.y_test))
+        print(classification_report(self.y_test, y_pred,target_names=self.__impact_tags))
+
+    def __random_forest(self):
+        rf = Pipeline([('vect', CountVectorizer()),
+                ('tfidf', TfidfTransformer()),
+                ('clf', RandomForestClassifier(n_estimators=200, max_depth=3, random_state=0)),
+               ])
+        rf.fit(self.X_train, self.y_train)
+
+        y_pred = rf.predict(self.X_test)
+
+        print('accuracy %s' % accuracy_score(y_pred, self.y_test))
+        print(classification_report(self.y_test, y_pred,target_names=self.__impact_tags))
+
+
+    def __KNeighbors_classifier(self):
+        kn = Pipeline([('vect', CountVectorizer()),
+                ('tfidf', TfidfTransformer()),
+                ('clf', KNeighborsClassifier(n_neighbors=5)),
+               ])
+        kn.fit(self.X_train, self.y_train)
+
+        y_pred = kn.predict(self.X_test)
+
+        print('accuracy %s' % accuracy_score(y_pred, self.y_test))
+        print(classification_report(self.y_test, y_pred,target_names=self.__impact_tags))
