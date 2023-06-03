@@ -11,3 +11,4 @@ Shapely
 pyclipper
 ninja
 imutils
+easyocr
