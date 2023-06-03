@@ -27,3 +27,20 @@ Method that parses a time and date of each element in the  input list of charact
 ### `give_objects(frame)`
 
 Method that receives an image and uses opencv to extract the maximum contours in the image. It contains a placeholder for object type, as the neural network is work in progress. The method returns a list of objects detected in the input frame.
+
+# Examples:
+
+## `video-example.py`
+
+This example shows how to use the VideoAnalyzer class to analyze a video and create a csv file with the information of the objects detected in the video.
+
+It requires a video file to run.
+
+The script shoulw be run as follows:
+```
+python3 video-example.py -i <path_to_video> -o <path_to_output_csv_file>
+```
+
+It will take a lot of time to process the video
+> Aproxiamtely the same time as the video duration
+
