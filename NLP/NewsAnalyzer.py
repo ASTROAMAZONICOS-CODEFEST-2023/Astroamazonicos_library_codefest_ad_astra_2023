@@ -1,5 +1,6 @@
 # Importing dependencies
 
+import pickle
 import spacy
 import es_core_news_lg
 import re
@@ -72,7 +73,19 @@ class NewsAnalyzer:
 
         datos_preprocess:pd.DataFrame = self.__main_preprocess(df, self.__impact_tags)
         datos_new_columns:pd.DataFrame = self.__main_ner(datos_preprocess)
+
+        # X = datos_new_columns.text_preprocess
+        # y = datos_new_columns.etiqueta_preprocess  
+        # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state = 42)
+
         print(datos_preprocess.head())
+
+    def identify_factor(self, model_name:str = "SGD"):
+        """
+        """
+        loaded_model = pickle.load(open("/models/model"+model_name+".sav", 'rb'))
+        return loaded_model.predict()
+
 
 
     __default_path = "https://www.wwf.org.co/_donde_trabajamos_/amazonas/las_seis_grandes_amenazas_de_la_amazonia/#:~:text=Desde%20el%20a%C3%B1o%202000%20hasta,la%20deforestaci%C3%B3n%20en%20la%20regi%C3%B3n"
