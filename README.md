@@ -1,5 +1,32 @@
 # Astroamazonicos_library_codefest_ad_astra_2023
 This repository contains the work done by the Astroamazonicos team during the CodeFest Ad Astra 2023 competition
+
+# Prerequirements:
+In order to use the library, required dependencies listed on the requirements.txt file.
+
+Use the following commands:
+
+```
+python3 -m pip install -r requirements.txt
+```
+
+# Examples:
+
+## `video-example.py`
+
+This example shows how to use the VideoAnalyzer class to analyze a video and create a csv file with the information of the objects detected in the video.
+
+It requires a video file to run.
+
+The script shoulw be run as follows:
+```
+python3 video-example.py -i <path_to_video> -o <path_to_output_csv_file>
+```
+
+It will take a lot of time to process the video
+> Aproxiamtely the same time as the video duration
+
+
 # VideoAnalyzer library:
 ## Description:
 The VideoAnalizer library contains methods inside `VideoAnalyzer` class that recives image and video data for analyzing information of Amazonas objects from an aerial perspective.
@@ -23,24 +50,9 @@ Method that receives a list of characters. The method checks the length of each 
 
 ### `parse_time_date(chars: list)`
 Method that parses a time and date of each element in the  input list of characters. Since the time and date allways have the same length and structure, it is possible to parse them by indexing key characters. The method updates the class atributes "date" and "hour".
+ 
+
 
 ### `give_objects(frame)`
 
 Method that receives an image and uses opencv to extract the maximum contours in the image. It contains a placeholder for object type, as the neural network is work in progress. The method returns a list of objects detected in the input frame.
-
-# Examples:
-
-## `video-example.py`
-
-This example shows how to use the VideoAnalyzer class to analyze a video and create a csv file with the information of the objects detected in the video.
-
-It requires a video file to run.
-
-The script shoulw be run as follows:
-```
-python3 video-example.py -i <path_to_video> -o <path_to_output_csv_file>
-```
-
-It will take a lot of time to process the video
-> Aproxiamtely the same time as the video duration
-
