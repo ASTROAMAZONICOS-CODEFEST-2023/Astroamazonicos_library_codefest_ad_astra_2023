@@ -220,7 +220,7 @@ class NewsAnalyzer:
                 words=words+" "+ word
         return words
     
-    def __replace_tildes(text):
+    def __replace_tildes(self,text):
         text = text.replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u").replace("▪", "").replace("ü", "u")
         return text
 
@@ -253,12 +253,12 @@ class NewsAnalyzer:
     
     # Metodo que reune todos los metodos de preprocesamiento
     def __process_text_pipeline(self, text:str)->str:
-        text = self.preprocess_text(text)
-        text = self.replace_tildes(text)
-        text = self.deEmojify(text)
-        text = self.remove_special_characters(text)
-        text = self.clean_string(text)
-        text = self.delete_punctuation(text)
+        text = self.__preprocess_text(text)
+        text = self.__replace_tildes(text)
+        text = self.__deEmojify(text)
+        text = self.__remove_special_characters(text)
+        text = self.__clean_string(text)
+        text = self.__delete_punctuation(text)
         return text
     
     def __delete_punctuation(self, text):
@@ -271,9 +271,9 @@ class NewsAnalyzer:
         for index, row in df.iterrows():
             text = str(row[df.columns.get_loc("TEXTO")])
             text2 = str(row[df.columns.get_loc("ETIQUETA")])
-            final_list.append(self.process_text_pipeline(text))
+            final_list.append(self.__process_text_pipeline(text))
             
-            tag_parts:list = self.process_text_pipeline(text2).split(" ") 
+            tag_parts:list = self.__process_text_pipeline(text2).split(" ") 
             
             tag:str = "" 
             for t in tag_parts:
@@ -296,10 +296,10 @@ class NewsAnalyzer:
         
         for index, row in df.iterrows():
             text_pre_process = str(row[df.columns.get_loc("text_preprocess")])
-            names:str = self.find_names(text_pre_process,nlp)
-            locs:str = self.find_locations(text_pre_process, nlp)
-            orgs:str = self.find_organizations(text_pre_process, nlp)
-            dates:str = self.find_dates(text_pre_process, nlp)
+            names:str = self.__find_names(text_pre_process,self.__nlp)
+            locs:str = self.__find_locations(text_pre_process,self. __nlp)
+            orgs:str = self.__find_organizations(text_pre_process, self.__nlp)
+            dates:str = self.__find_dates(text_pre_process, self.__nlp)
             
             names_list.append(names)
             locs_list.append(locs)
@@ -317,10 +317,10 @@ class NewsAnalyzer:
     # Impact tag ML model methods
 
     # datos_new_columns
-    X = data_new2.text_preprocess
-    y = data_new2.etiqueta_preprocess
+    #X = data_new2.text_preprocess
+    #y = data_new2.etiqueta_preprocess
 
-    __X_train, __X_test, __y_train, __y_test = train_test_split(X, y, test_size=0.3, random_state = 42)
+    #__X_train, __X_test, __y_train, __y_test = train_test_split(X, y, test_size=0.3, random_state = 42)
 
     def __multinomial_NB(self):
         nb = Pipeline([('vect', CountVectorizer()),
