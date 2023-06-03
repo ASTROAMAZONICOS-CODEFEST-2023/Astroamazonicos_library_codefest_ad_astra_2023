@@ -11,6 +11,12 @@ import time
 
 class VideoAnalizer():
     def __init__(self):
+        """
+    This function uses of entity labels from spacy to find dates. It also use the re library to find patterns in the text
+    that could lead in to a date.
+    input: 
+    output: 
+    """
         self.reader = easyocr.Reader(["es","en"], gpu=True) #instance  Reader class, used for character recognition
         print ("Reader easyocr class started")
         # initialize variables
@@ -23,17 +29,19 @@ class VideoAnalizer():
 
     def detect_objects_in_video(self, video_path: str, output_path: str):
         with open(output_path, 'w') as f: #start writing output
-            for frame in self.convert_frames(video_path, 1):
+            videocap = cv2.VideoCapture(video_path)
+            success, image = videocap.read()
+            framespersecond= int(videocap.get(cv2.CAP_PROP_FPS))
+            print (framespersecond)
+            for i in range (framespersecond):
+                success, frame = videocap.read() # get frame 
                 self.read_ocr(frame) # call method that reads text from the frame and updates time, coordinates and date
                 objects = self.give_objects(frame) # call method that gets objects from the frame 
                 for obj in objects:
                     obj_id = obj['id']
                     obj_type = obj['type']
                     f.write(f'{obj_id},{obj_type},{self.hour},{self.coord1 + " - " + self.coord2}, {self.date}\n')
-
-    def convert_frames(self, video: str, framerate: int):
-        comand = "ffmpeg -i "+ video + " -vf fps="+ str(framerate) + "Video/out%d.png" 
-        system(comand)
+        
     def read_ocr(self, frame):
         result = self.reader.readtext(frame, paragraph=True) #read text from image
         for res in result:
@@ -56,7 +64,6 @@ class VideoAnalizer():
                 elif ("8" in chars[i]):
                     self.hour = str(chars[i][0:2])+":"+str(chars[i][3:5])+":"+str(chars[i][6:8]) #Get time
                 
-
     def give_objects(self, frame) -> list:
         pass
 
@@ -65,5 +72,3 @@ class VideoAnalizer():
         if not os.path.exists(output_path):
             os.makedirs(output_path)
             os.makedirs(f'{output_path}/IMG')
-
-        cv2.imwrite(f'{output_path}/IMG/{id}.jpg', frame)
