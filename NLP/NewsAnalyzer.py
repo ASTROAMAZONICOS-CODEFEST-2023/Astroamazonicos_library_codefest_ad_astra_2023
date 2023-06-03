@@ -27,6 +27,8 @@ import urllib.parse
 import urllib.error
 import requests
 from bs4 import BeautifulSoup
+import json
+import sys
 
 #import ML models
 
@@ -39,6 +41,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.linear_model import SGDClassifier
 
+sys.setrecursionlimit(1500000)
 class NewsAnalyzer:
     """
     buenas
@@ -49,9 +52,26 @@ class NewsAnalyzer:
     
     __nlp = spacy.load("es_core_news_lg")
 
-    def ner_from_str(self):
+    def ner_from_str(self, text:str):
         """
         """
+        d = pd.DataFrame(text)
+        
+        datos_preprocess:pd.DataFrame = self.__main_preprocess(d, self.__impact_tags, summary)
+        datos_new_columns:pd.DataFrame = self.__main_ner(datos_preprocess)
+        datos_new_columns["ImpactPrediction"] =  self.__identify_factor(datos_new_columns["text_preprocess"])
+        json_file = open(output_path+"/result.json","w")
+        json_dict = datos_new_columns[["TEXTO","ImpactPrediction","NAMES"]].iloc[0].to_json(orient = 'records')
+        print(json_dict)
+        # print(type(json_dict))
+        
+        json_file.write(json_dict)
+        #json_object = json.dumps(json_dict)
+        
+        # json_file.write(json_object)
+        # df2 = df.to_json(orient = 'records')
+        
+        json_file.close
 
         pass
 
@@ -67,24 +87,40 @@ class NewsAnalyzer:
 
         pass
 
-    def ner_from_dataset(self,df:pd.DataFrame, output_path:str)->None:
-        """Return a dataframe with a cleaned tags and cleaned text.
+    def ner_from_dataset(self,df:pd.DataFrame, output_path:str, summary = False)->None:
+        """
+        Return a dataframe with a cleaned tags and cleaned text.
         """
 
-        datos_preprocess:pd.DataFrame = self.__main_preprocess(df, self.__impact_tags)
-        datos_new_columns:pd.DataFrame = self.__main_ner(datos_preprocess)
+        processed = 
 
         # X = datos_new_columns.text_preprocess
         # y = datos_new_columns.etiqueta_preprocess  
         # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state = 42)
+        datos_new_columns["ImpactPrediction"] =  self.__identify_factor(datos_new_columns["text_preprocess"])
+        # datos_new_columns["summary"] = 
+        json_file = open(output_path+"/result.json","w")
+        json_dict = datos_new_columns[["TEXTO","ImpactPrediction","NAMES"]].iloc[0].to_json(orient = 'records')
+        print(json_dict)
+        # print(type(json_dict))
+        
+        json_file.write(json_dict)
+        #json_object = json.dumps(json_dict)
+        
+        # json_file.write(json_object)
+        # df2 = df.to_json(orient = 'records')
+        
+        json_file.close
+        
+        
+        print(datos_preprocess)
+        
 
-        print(datos_preprocess.head())
-
-    def identify_factor(self, model_name:str = "SGD"):
+    def __identify_factor(self, X, model_name:str = "SGD"):
         """
         """
-        loaded_model = pickle.load(open("/models/model"+model_name+".sav", 'rb'))
-        return loaded_model.predict()
+        loaded_model = pickle.load(open("models/model"+model_name+".sav", 'rb'))
+        return loaded_model.predict(X)
 
 
 
@@ -189,7 +225,7 @@ class NewsAnalyzer:
         return person
     
     # Feature adicional de resumen
-    def __summarize(self, text, per):
+    def __summarize(self, text, per=0.5):
         # nlp = spacy.load('en_core_web_sm')
         nlp = spacy.load('es_core_news_lg')
         doc= nlp(text)
@@ -278,14 +314,19 @@ class NewsAnalyzer:
         new_string = text.translate(str.maketrans('', '', string.punctuation))
         return new_string
     
-    def __main_preprocess(self, df, tags:list):
+    def __main_preprocess(self, df, tags:list, summary = False):
         final_list = []
         target_list = []
+        summary_list = []
+        
         for index, row in df.iterrows():
             text = str(row[df.columns.get_loc("TEXTO")])
             text2 = str(row[df.columns.get_loc("ETIQUETA")])
-            final_list.append(self.__process_text_pipeline(text))
             
+            final_list.append(self.__process_text_pipeline(text))
+            if summary:
+                text3 = str(row[df.columns.get_loc("TEXTO")])
+                summary_list.append(self.__summarize(text3))
             tag_parts:list = self.__process_text_pipeline(text2).split(" ") 
             
             tag:str = "" 
@@ -299,6 +340,8 @@ class NewsAnalyzer:
             
         df["text_preprocess"] = final_list
         df["etiqueta_preprocess"] = target_list
+        if summary:
+            df["sumarize"] = summary_list
         return df
     
     def __main_ner(self, df:pd.DataFrame)-> pd.DataFrame:
