@@ -55,7 +55,7 @@ class NewsAnalyzer:
     def ner_from_str(self, text:str):
         """
         """
-        d = pd.DataFrame(text)
+        d = pd.DataFrame(text, columns = "TEXTO")
         
         datos_preprocess:pd.DataFrame = self.__main_preprocess(d, self.__impact_tags, summary)
         datos_new_columns:pd.DataFrame = self.__main_ner(datos_preprocess)
@@ -66,33 +66,57 @@ class NewsAnalyzer:
         # print(type(json_dict))
         
         json_file.write(json_dict)
-        #json_object = json.dumps(json_dict)
-        
-        # json_file.write(json_object)
-        # df2 = df.to_json(orient = 'records')
         
         json_file.close
+        print(datos_preprocess)
 
-        pass
 
-    def ner_from_file(self):
+    def ner_from_file(self,ruta):
         """
         """
+        archivo = open(ruta,"r")
+        lista = archivo.read()
+        d = pd.DataFrame(lista, columns = "TEXTO")
+        
+        datos_preprocess:pd.DataFrame = self.__main_preprocess(d, self.__impact_tags, summary)
+        datos_new_columns:pd.DataFrame = self.__main_ner(datos_preprocess)
+        datos_new_columns["ImpactPrediction"] =  self.__identify_factor(datos_new_columns["text_preprocess"])
+        json_file = open(output_path+"/result.json","w")
+        json_dict = datos_new_columns[["TEXTO","ImpactPrediction","NAMES"]].iloc[0].to_json(orient = 'records')
+        print(json_dict)
+        # print(type(json_dict))
+        
+        json_file.write(json_dict)
+        
+        json_file.close
+        print(datos_preprocess)
 
-        pass
 
-    def ner_from_url(self):
+    def ner_from_url(self, url):
         """
         """
-
-        pass
+        text = self.web_scrapping(url)
+        d = pd.DataFrame(text, columns = "TEXTO")
+        
+        datos_preprocess:pd.DataFrame = self.__main_preprocess(d, self.__impact_tags, summary)
+        datos_new_columns:pd.DataFrame = self.__main_ner(datos_preprocess)
+        datos_new_columns["ImpactPrediction"] =  self.__identify_factor(datos_new_columns["text_preprocess"])
+        json_file = open(output_path+"/result.json","w")
+        json_dict = datos_new_columns[["TEXTO","ImpactPrediction","NAMES"]].iloc[0].to_json(orient = 'records')
+        print(json_dict)
+        # print(type(json_dict))
+        
+        json_file.write(json_dict)
+        
+        json_file.close
+        print(datos_preprocess)
 
     def ner_from_dataset(self,df:pd.DataFrame, output_path:str, summary = False)->None:
         """
         Return a dataframe with a cleaned tags and cleaned text.
         """
 
-        processed = 
+        # processed = 
 
         # X = datos_new_columns.text_preprocess
         # y = datos_new_columns.etiqueta_preprocess  
@@ -125,19 +149,24 @@ class NewsAnalyzer:
 
 
     __default_path = "https://www.wwf.org.co/_donde_trabajamos_/amazonas/las_seis_grandes_amenazas_de_la_amazonia/#:~:text=Desde%20el%20a%C3%B1o%202000%20hasta,la%20deforestaci%C3%B3n%20en%20la%20regi%C3%B3n"
+    
+    def extractScripts(self, soup):
+        for s in soup.select('style'):
+            s.extract()
 
+        return soup
 
-    def web_scrapping(self, url:string = __default_path)->BeautifulSoup:
+    def web_scrapping(self, url:string)->BeautifulSoup:
         """
         """
         # URL
         r = requests.get(url)
         data = r.text
         soup = BeautifulSoup(data, "html.parser")
-        #Extract content
-        for s in soup.select('style'):
-            s.extract()
-
+        soup = self.extractScripts(soup)
+        text = soup.get_text()
+        text=text.replace("\n","")
+        text=text.replace("\r","")
         return soup
 
     # NLP
