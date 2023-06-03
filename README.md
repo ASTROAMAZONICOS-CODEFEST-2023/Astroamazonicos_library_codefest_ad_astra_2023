@@ -56,3 +56,17 @@ Method that parses a time and date of each element in the  input list of charact
 ### `give_objects(frame)`
 
 Method that receives an image and uses opencv to extract the maximum contours in the image. It contains a placeholder for object type, as the neural network is work in progress. The method returns a list of objects detected in the input frame.
+
+
+# NLP library:
+## Description:
+This objective consists of identifying entities in the news that describe environmental effects on the Colombian Amazon. The available data set is made up of news from 2010 to 2023 and has 187 records, which describe situations affecting the Colombian Amazon related to contamination, illegal extraction of minerals and deforestation. In this type of news, it is important to automatically identify the actors that register some type of direct or indirect participation in said affectation. For this automated search and classification of texts, there are NER tools that identify entities such as locations, organizations, people and other actors in texts. Examples of these tools are: Spacy, BERT Google, NLP Stanford, Gate, OpenNLP, among others.
+
+# Approach:
+The approximation that was taken seeks to obtain information from four main sources:
+1. A text directly
+2. A text file
+3. A data frame
+4. A link to a news item, in which beautiful soup is used to be able to do webscraping and extract information from the text
+
+Subsequently, the code undergoes a cleanup of the text, which involves removing stopwords, punctuation marks, putting all words in lowercase, and removing special characters. Then, spacy and regular expressions are used to extract entities such as: location, people, dates, important factors, a summary of the text.
