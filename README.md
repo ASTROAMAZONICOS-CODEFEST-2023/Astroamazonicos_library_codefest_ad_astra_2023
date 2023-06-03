@@ -62,11 +62,33 @@ Method that receives an image and uses opencv to extract the maximum contours in
 ## Description:
 This objective consists of identifying entities in the news that describe environmental effects on the Colombian Amazon. The available data set is made up of news from 2010 to 2023 and has 187 records, which describe situations affecting the Colombian Amazon related to contamination, illegal extraction of minerals and deforestation. In this type of news, it is important to automatically identify the actors that register some type of direct or indirect participation in said affectation. For this automated search and classification of texts, there are NER tools that identify entities such as locations, organizations, people and other actors in texts. Examples of these tools are: Spacy, BERT Google, NLP Stanford, Gate, OpenNLP, among others.
 
-# Approach:
+## Approach:
 The approximation that was taken seeks to obtain information from four main sources:
 1. A text directly
 2. A text file
 3. A data frame
 4. A link to a news item, in which beautiful soup is used to be able to do webscraping and extract information from the text
 
-Subsequently, the code undergoes a cleanup of the text, which involves removing stopwords, punctuation marks, putting all words in lowercase, and removing special characters. Then, spacy and regular expressions are used to extract entities such as: location, people, dates, important factors, a summary of the text.
+Subsequently, the code undergoes a cleanup of the text, which involves removing stopwords, punctuation marks, putting all words in lowercase, and removing special characters. Then, spacy and regular expressions are used to extract entities such as: location, people, dates, important factors, a summary of the text and organizations.
+
+## Usage:
+Create a python module and import the library as follows
+```
+from NewsAnalyzer import NewsAnalyzer
+```
+
+Then an instance of the class is created as follows:
+```
+n = NewsAnalyzer()
+```
+
+Now choose the method of your choice to run, depending on the type of data you wish to put as input.
+
+- ner_from_str(text, output_path)
+- ner_from_file(text_path, output_path)
+- ner_from_url(url, output_path)
+- ner_from_df(path, output_path)
+
+The result will be saved in output path.
+
+** Disclaimer: ** To see all the features in depth see the working jupyter notebook file.
